@@ -36,8 +36,8 @@ function chooseTrack(id){active=TRACKS.find(t=>t.id===id)||TRACKS[0];$("workspac
 function goHome(){$("workspace").classList.add("hide");$("home").scrollIntoView({behavior:"smooth",block:"start"});}
 function modeName(m){return ({people:"人物・場所",laws:"法律・条約",timeline:"年表",sequence:"時代・王朝・事件順／地理正誤"})[m]||m;}
 function openMode(mode){activeMode=mode;$("menu").classList.add("hide");$("stage").classList.remove("hide");let title="",body="",d=BANK[active.id];
-if(mode==="people"||mode==="laws"){title=mode==="people"?"1. 人物・場所":"2. 法律・条約";body=d[mode].map(x=>'<article class="entry" id="entry-'+slug(x[0])+'"><h3>'+esc(x[0])+' <span class="tag">'+esc(x[1])+'</span></h3><p>'+esc(x[2])+'</p><p class="muted">関連：'+esc(x[3])+'</p></article>').join("");}
-if(mode==="timeline"){title="3. 年表";body='<div class="timeline">'+d.timeline.map(x=>'<article class="event" id="entry-'+slug(x[1])+'"><div class="year">'+esc(x[0])+'</div><strong>'+esc(x[1])+'</strong><div>'+esc(x[2])+'</div></article>').join("")+'</div>';}
+if(mode==="people"||mode==="laws"){title=mode==="people"?"1. 人物・場所":"2. 法律・条約";body=sortHistoryEntries(d[mode],mode).map(x=>'<article class="entry" id="entry-'+slug(x[0])+'"><h3>'+esc(x[0])+' <span class="tag">'+esc(x[1])+'</span></h3><p>'+esc(x[2])+'</p><p class="muted">関連：'+esc(x[3])+'</p></article>').join("");}
+if(mode==="timeline"){title="3. 年表";body='<div class="timeline">'+sortTimeline(d.timeline).map(x=>'<article class="event" id="entry-'+slug(x[1])+'"><div class="year">'+esc(x[0])+'</div><strong>'+esc(x[1])+'</strong><div>'+esc(x[2])+'</div></article>').join("")+'</div>';}
 if(mode==="sequence"){title="4. 時代・王朝・事件順／地理正誤";body=d.sequence.map(x=>'<article class="entry" id="entry-'+slug(x[0])+'"><h3>'+esc(x[0])+'</h3><p>'+esc(x[1])+'</p><p class="muted">'+esc(x[2])+'</p></article>').join("");if(active.id==="geo"||active.id==="integrated")body+='<h3>地理・資料の正誤チェック</h3>'+d.tf.map(x=>'<article class="entry"><strong>'+esc(x[0])+'</strong><p>'+esc(x[1])+'</p><p class="muted">正解：'+(x[2]?"正しい":"誤り")+'。'+esc(x[3])+'</p></article>').join("");}
 if(mode==="search"){title="10. 単語検索";body='<p class="muted">用語を検索して、人物・場所／法律・条約／年表／順序整理へ移動できます。</p><div class="searchrow"><input id="termSearch" type="search" placeholder="例：憲法、ガンディー、サヘル"><button id="doSearch">検索</button></div><div id="searchResults"></div>';}
 if(["mcq","tf","fill","mock","common"].includes(mode)){title=({"mcq":"5. 四択問題","tf":"6. 正誤問題","fill":"7. 空欄補充","mock":"8. 模擬テスト","common":"9. 共通テスト型"})[mode];let scope="";if(active.id==="integrated")scope='<label for="rangeSelect">出題範囲：</label><select id="rangeSelect"><option value="all">3範囲を横断</option><option value="geo">地理総合</option><option value="history">歴史総合</option><option value="public">公共</option></select>';body='<p class="muted">解答後に正誤・解説・間違えた範囲を表示します。</p>'+scope+'<div id="quiz"></div><div class="toolbar"><button id="gradeQuiz">採点して弱点を確認</button><button class="secondary" id="retryQuiz">もう一度出題</button></div><div id="quizResult"></div>';}
@@ -45,7 +45,33 @@ $("stage").innerHTML='<div class="row"><h2>'+title+'</h2><button class="ghost" i
 $("menuBack").onclick=()=>{$("stage").classList.add("hide");$("menu").classList.remove("hide");};
 if(["mcq","tf","fill","mock","common"].includes(mode)){if($("rangeSelect"))$("rangeSelect").onchange=()=>renderQuiz(mode);renderQuiz(mode);}
 if(mode==="search"){const run=()=>doSearch($("termSearch").value);$("doSearch").onclick=run;$("termSearch").addEventListener("keydown",e=>{if(e.key==="Enter")run();});}}
-function doSearch(term){const out=$("searchResults"),q=term.trim().toLowerCase();if(!q){out.innerHTML='<p class="notice">検索する語句を入力してください。</p>';return;}const d=BANK[active.id];let hits=[];["people","laws","timeline","sequence"].forEach(m=>d[m].forEach(x=>{if(x.join(" ").toLowerCase().includes(q))hits.push({mode:m,title:x[0],detail:x.slice(1).join(" / ")});}));hits=hits.filter((x,i,a)=>a.findIndex(y=>y.mode===x.mode&&y.title===x.title)===i);if(!hits.length){out.innerHTML='<p class="notice">見つかりませんでした。別の語句で試してください。</p>';return;}out.innerHTML='<p>検索結果：'+hits.length+'件</p>'+hits.map(h=>'<article class="entry"><h3>'+esc(h.title)+'</h3><p>'+esc(h.detail)+'</p><button class="secondary jump" data-mode="'+h.mode+'" data-title="'+esc(h.title)+'">「'+modeName(h.mode)+'」で開く</button></article>').join("");out.querySelectorAll(".jump").forEach(b=>b.onclick=()=>{openMode(b.dataset.mode);setTimeout(()=>{const el=$("stage").querySelector("#entry-"+slug(b.dataset.title));if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},20);});}
+function normalizeSearch(v){return String(v||"").normalize("NFKC").toLowerCase().replace(/[\s・･‐‑–—ー]/g,"");}
+const HISTORY_ALIASES={
+"伊藤博文":"伊藤俊輔 初代内閣総理大臣 内閣制度 大日本帝国憲法 明治憲法 憲法制定 1885年 1889年 1890年",
+"原敬":"平民宰相 政党内閣 政党政治 1918年 1921年",
+"吉田茂":"サンフランシスコ平和条約 主権回復 戦後外交 1951年 1952年",
+"板垣退助":"自由民権運動 民選議院 国会開設 1881年 1882年",
+"福沢諭吉":"学問のすゝめ 学問ノススメ 啓蒙思想 文明開化 1872年",
+"大久保利通":"明治維新 中央集権 廃藩置県 1871年 1873年",
+"西郷隆盛":"明治維新 西南戦争 士族反乱 1877年",
+"大隈重信":"立憲改進党 早稲田大学 政党政治 1882年 1914年",
+"聖徳太子":"厩戸王 冠位十二階 十七条憲法 飛鳥時代 604年 607年",
+"織田信長":"長篠の戦い 安土桃山時代 天下統一 1575年 1582年",
+"大日本帝国憲法":"明治憲法 1889年 伊藤博文",
+"日本国憲法":"1946年公布 1947年施行 国民主権 基本的人権 平和主義",
+"御成敗式目":"貞永式目 1232年 北条泰時 鎌倉幕府",
+"五箇条の御誓文":"1868年 明治維新 新政府",
+"サンフランシスコ平和条約":"1951年調印 1952年発効 主権回復 吉田茂",
+"パリ協定":"2015年 気候変動 COP21 地球温暖化",
+"ラムサール条約":"1971年 湿地 水鳥",
+"京都議定書":"1997年 2005年発効 気候変動 温室効果ガス",
+"生物多様性条約":"1992年 1993年発効 生態系 種の多様性",
+"排他的経済水域（EEZ）":"EEZ 国連海洋法条約 200海里"
+};
+function yearOf(v){const m=String(v||"").match(/(\d{3,4})\s*年?/);if(m)return Number(m[1]);const n=normalizeSearch(v);const eras=[["縄文", -14000],["弥生",-300],["古墳",250],["飛鳥",592],["奈良",710],["平安",794],["鎌倉",1185],["室町",1336],["戦国",1467],["安土桃山",1573],["江戸",1603],["幕末",1853],["明治",1868],["大正",1912],["昭和",1926],["戦後",1945],["令和",2019]];for(const [e,y] of eras)if(n.includes(normalizeSearch(e)))return y;return 9999;}
+function sortHistoryEntries(items,mode){return items.slice().sort((a,b)=>yearOf(a[1]+" "+a[2]+" "+a[3])-yearOf(b[1]+" "+b[2]+" "+b[3])||String(a[0]).localeCompare(String(b[0]),"ja"));}
+function sortTimeline(items){return items.slice().sort((a,b)=>yearOf(a[0])-yearOf(b[0])||String(a[0]).localeCompare(String(b[0]),"ja"));}
+function doSearch(term){const out=$("searchResults"),q=normalizeSearch(term);if(!q){out.innerHTML='<p class="notice">検索する語句を入力してください。</p>';return;}const d=BANK[active.id];let hits=[];["people","laws","timeline","sequence"].forEach(m=>d[m].forEach(x=>{const alias=HISTORY_ALIASES[x[0]]||"";const text=normalizeSearch(x.join(" ")+" "+alias);if(text.includes(q))hits.push({mode:m,title:x[0],detail:x.slice(1).join(" / "),year:yearOf(x.join(" "))});}));hits=hits.filter((x,i,a)=>a.findIndex(y=>y.mode===x.mode&&y.title===x.title)===i).sort((a,b)=>a.year-b.year||a.title.localeCompare(b.title,"ja"));if(!hits.length){out.innerHTML='<p class="notice">見つかりませんでした。正式名称・年代・関連語でも検索してみてください。</p>';return;}out.innerHTML='<p>検索結果：'+hits.length+'件（年代順）</p>'+hits.map(h=>'<article class="entry"><h3>'+esc(h.title)+'</h3><p>'+esc(h.detail)+'</p><button class="secondary jump" data-mode="'+h.mode+'" data-title="'+esc(h.title)+'">「'+modeName(h.mode)+'」で開く</button></article>').join("");out.querySelectorAll(".jump").forEach(b=>b.onclick=()=>{openMode(b.dataset.mode);setTimeout(()=>{const el=$("stage").querySelector("#entry-"+slug(b.dataset.title));if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},20);});}
 function shuffle(a){return a.slice().sort(()=>Math.random()-.5);}
 function renderQuiz(mode){let d=BANK[active.id],range=$("rangeSelect")?.value||"all",pool=[];if(mode==="mcq")pool=d.questions.slice();if(mode==="tf")pool=d.tf.slice();if(mode==="fill")pool=d.fill.slice();if(mode==="common")pool=d.common.map(x=>["資料読解",x[0],x[1],x[2],x[3],"資料読解"]);if(mode==="mock")pool=d.questions.concat(d.tf.map(x=>[x[0],x[1],["正しい","誤り"],x[2]?0:1,x[3],x[0]])).concat(d.fill.map(x=>[x[2],x[0],[x[1]],0,"正答："+x[1],x[2]]));
 if(active.id==="integrated"&&range!=="all"){const keys={geo:["地理","環境"],history:["歴史","革命","独立"],public:["公共","人権","持続可能"]}[range];pool=pool.filter(q=>keys.some(k=>(q.join(" ")).includes(k)));if(!pool.length)pool=d[mode==="tf"?"tf":"questions"].slice();}
