@@ -45,3 +45,31 @@ jobs:
               print(f'Checked {f}: {len(a.scripts)} scripts')
           if failed: sys.exit(1)
           PY
+
+      - name: Check Stage 2 social studies coverage and answer data
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, sys
+          source = Path('practice.html').read_text(encoding='utf-8')
+          required = [
+              '【時代の流れ】', '【因果関係】', '【資料読解】',
+              '【地図読解】', '【統計・グラフ】', '【公共用語】',
+              '【制度・思想比較】', '【事例問題】',
+          ]
+          missing = [x for x in required if x not in source]
+          record_re = re.compile(r'\["([^"]*)",\[([^\]]*)\],(\d+),"([^"]*)"\]')
+          records = record_re.findall(source)
+          for n, (_, raw_choices, raw_answer, explanation) in enumerate(records, 1):
+              choices = re.findall(r'"([^"]*)"', raw_choices)
+              if len(choices) < 2 or int(raw_answer) >= len(choices) or not explanation.strip():
+                  missing.append(f'invalid answer data in question {n}')
+          if len(records) < 18:
+              missing.append(f'expected at least 18 question records, found {len(records)}')
+          if missing:
+              print('Stage 2 social studies validation errors:')
+              print('\n'.join(missing))
+              sys.exit(1)
+          print(f'Stage 2 social studies coverage OK; validated {len(records)} question records')
+          PY
