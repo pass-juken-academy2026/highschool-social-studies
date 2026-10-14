@@ -247,7 +247,7 @@ makeSocialQuestion("避難所Bが使えるか判断するために必要なの�
 makeSocialQuestion("この事例の中心となる課題は？",["地形・土地利用・防災計画を結びつけること","川の存在を無視すること","住宅地の位置を記録しないこと","避難経路をなくすこと"],0,"自然条件と人間の土地利用を合わせて防災を考える事例。","地理・防災")
 ]),
 jhist:makeSocialCase("大問1・戦後改革と生活","戦後、日本では新しい憲法の施行、教育制度の改革、農地改革などが進んだ。生活物資の不足は続いたが、復興が進むにつれて産業や都市の様子も変化した。", "歴史総合・日本史",[
-makeSocialQuestion("日本国憲法が施行された年は？",["1945年","1946年","1947年","1952年"],2,"日本国憲法は1947年に施行された。","戦後改革"),
+makeSocialQuestion("新憲法が実際に効力を持ち始めたのは何年？",["1945年","1946年","1947年","1952年"],2,"日本国憲法は1947年に施行された。","戦後改革"),
 makeSocialQuestion("農地改革の目的の一つとして適切なのは？",["地主制を見直し、自作農を増やすこと","農地を全て工場に変えること","農業を廃止すること","土地の所有を一切禁止すること"],0,"農地改革は地主制を見直し、自作農を増やす方向で進められた。","農地改革"),
 makeSocialQuestion("戦後の生活資料を読むときに重要なのは？",["物資不足など当時の社会状況を考慮する","現在の生活水準をそのまま当てはめる","資料の年代を無視する","個人の経験を全員の経験とみなす"],0,"当時の物資不足や制度の変化を踏まえて資料を解釈する必要がある。","史料読解"),
 makeSocialQuestion("戦後改革の影響を検討する資料は？",["法律・学校制度・土地所有・生活記録","現在の天気だけ","スポーツの結果だけ","地名の読み方だけ"],0,"制度の記録と生活の資料を組み合わせて影響を考えられる。","歴史総合"),
@@ -279,7 +279,7 @@ makeSocialQuestion("AI利用の中心的な課題は？",["便利さと権利・
 politics:makeSocialCase("大問1・地域予算と住民参加","市は限られた予算で、防災設備の更新、図書館の開館時間延長、道路の修繕を検討している。住民アンケートでは回答者によって優先順位が異なり、担当者は費用と緊急性、利用者への影響を比較することにした。", "公共政策",[
 makeSocialQuestion("予算配分で比較すべきことは？",["緊急性・費用・受益者・期待される効果","担当者の好みだけ","政策名の長さ","費用を確認しないこと"],0,"公共政策では、必要性、費用、受益者、効果などを比較する。","公共政策"),
 makeSocialQuestion("アンケート結果を全住民の意見とみなす前に確認したいことは？",["回答者の属性や未回答者の存在","回答数の数字だけ","紙の色だけ","担当者の年齢だけ"],0,"回答者に偏りがあると、結果が全住民の意見を代表しない可能性がある。","資料読解"),
-makeSocialQuestion("住民参加の方法として適切なのは？",["説明会や意見募集、結果の公表を行う","決定後も情報を公開しない","質問を受け付けない","住民の意見を記録しない"],0,"説明会や意見募集、情報公開は住民参加を支える。","民主主義"),
+makeSocialQuestion("住民が意思決定に関わる手段として最も適切なのは？",["説明会や意見募集、結果の公表を行う","決定後も情報を公開しない","質問を受け付けない","住民の意見を記録しない"],0,"説明会や意見募集、情報公開は住民参加を支える。","民主主義"),
 makeSocialQuestion("政策の実施後に確認すべきことは？",["目的を達成したか、誰にどんな効果があったか","会議の長さだけ","政策名を変えた回数","予算を使い切ったかだけ"],0,"政策の評価では、実施状況と住民への効果を確認する。","政策評価"),
 makeSocialQuestion("防災設備の更新を優先する根拠として考えられるのは？",["危険度や設備の老朽化、被害想定","図書館の本の色","道路名の長さ","アンケートの書体"],0,"防災の緊急性は、危険度や老朽化、被害想定などから検討できる。","防災"),
 makeSocialQuestion("限られた予算で優先順位が分かれる理由は？",["住民の必要や価値観、利用状況が異なるため","全員が必ず同じ意見だから","費用に差がないから","公共サービスは誰にも影響しないから"],0,"利用者や地域によって必要性が異なるため、優先順位が分かれることがある。","公共政策"),
@@ -381,7 +381,7 @@ function renderQuiz(mode){
  quizItems=pool;
  const timerMarkup=(mode==="common"||mode==="mock")?'<div id="socialExamTimer" class="notice">試験時間を準備中…</div>':"";
  $("quizResult").innerHTML="";
- $("quiz").innerHTML=timerMarkup+pool.map((q,i)=>{let type=(mode==="tf"?"tf":mode==="fill"?"fill":"mcq"),prompt=q[1],answer=q[2],explain=q[3],topic=q[0],choices="",casePanel="";if(type==="tf"){choices='<div class="choices"><label><input type="radio" name="q'+i+'" value="0">正しい</label><label><input type="radio" name="q'+i+'" value="1">誤り</label></div>';answer=q[2]?0:1;explain=q[3];}else if(type==="fill"){prompt=q[0];choices='<input class="fillAnswer" type="text" placeholder="答えを入力">';answer=q[1];explain=q[3];topic=q[2];}else{choices='<div class="choices">'+q[2].map((c,j)=>'<label><input type="radio" name="q'+i+'" value="'+j+'">'+esc(c)+'</label>').join("")+'</div>';answer=q[3];explain=q[4];topic=q[5]||q[0];}if(q[6]&&q[7])casePanel='<div class="panel" style="white-space:pre-wrap;background:#f8faff;box-shadow:none"><strong>'+esc(q[6])+'</strong><p>'+esc(q[7])+'</p></div>';return '<article class="question" data-i="'+i+'" data-topic="'+esc(topic)+'" data-answer="'+esc(answer)+'" data-explain="'+esc(explain)+'" data-type="'+type+'">'+casePanel+'<div class="tag">問題 '+(i+1)+' · '+esc(topic)+'</div><p><strong>'+esc(prompt)+'</strong></p>'+choices+'<div class="result hide" id="result-'+i+'"></div></article>';}).join("");
+ $("quiz").innerHTML=timerMarkup+pool.map((q,i)=>{let type=(mode==="tf"?"tf":mode==="fill"?"fill":"mcq"),prompt=q[1],answer=q[2],explain=q[3],topic=q[0],choices="",casePanel="";if(type==="tf"){choices='<div class="choices"><label><input type="radio" name="q'+i+'" value="0">正しい</label><label><input type="radio" name="q'+i+'" value="1">誤り</label></div>';answer=q[2]?0:1;explain=q[3];}else if(type==="fill"){prompt=q[0];choices='<input class="fillAnswer" type="text" placeholder="答えを入力">';answer=q[1];explain=q[3];topic=q[2];}else{choices='<div class="choices">'+q[2].map((c,j)=>'<label><input type="radio" name="q'+i+'" value="'+j+'">'+esc(c)+'</label>').join("")+'</div>';answer=q[3];explain=q[4];topic=q[5]||q[0];}if(q[6]&&q[7]&&(i===0||pool[i-1][6]!==q[6]))casePanel='<div class="panel" style="white-space:pre-wrap;background:#f8faff;box-shadow:none"><strong>'+esc(q[6])+'</strong><p>'+esc(q[7])+'</p></div>';return '<article class="question" data-i="'+i+'" data-topic="'+esc(topic)+'" data-answer="'+esc(answer)+'" data-explain="'+esc(explain)+'" data-type="'+type+'">'+casePanel+'<div class="tag">問題 '+(i+1)+' · '+esc(topic)+'</div><p><strong>'+esc(prompt)+'</strong></p>'+choices+'<div class="result hide" id="result-'+i+'"></div></article>';}).join("");
  $("gradeQuiz").onclick=gradeQuiz;
  $("retryQuiz").onclick=()=>renderQuiz(mode);
  if(mode==="common"||mode==="mock")startSocialTimer(mode);
