@@ -73,3 +73,27 @@ jobs:
               sys.exit(1)
           print(f'Stage 2 social studies coverage OK; validated {len(records)} question records')
           PY
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright and Chromium
+        run: |
+          npm init -y
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/study-site.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:4173/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/study-site.log
+          exit 1
+      - name: Exercise core study flows in Chromium
+        run: node tests/browser-smoke.cjs
