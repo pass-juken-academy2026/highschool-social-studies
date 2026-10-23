@@ -29,7 +29,8 @@ for (const track of tracks) {
     const malformed = items.filter(item =>
       item.some(value => typeof value === 'string' && /[。！？]{2,}/u.test(value))
     );
-    const titles = items.map(item => item[0]).filter(value => typeof value === 'string');
+    // Timeline records store the date in item[0] and the event title in item[1].
+    const titles = items.map(item => item[category === 'timeline' ? 1 : 0]).filter(value => typeof value === 'string');
     const duplicateTitles = titles.length - new Set(titles).size;
     total += items.length;
     flagged += suspicious.length;
