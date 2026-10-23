@@ -14,6 +14,12 @@ const examples = [];
 for (const track of tracks) {
   for (const category of categories) {
     const items = bank[track]?.[category] ?? [];
+    const categoryMismatches = items.filter(item => {
+      const title = typeof item[0] === 'string' ? item[0] : '';
+      return (category === 'people' && /^(制度比較|手順比較|比較演習)：/.test(title)) ||
+        (category === 'laws' && /^(人物比較|手順比較)：/.test(title)) ||
+        (category === 'sequence' && /^(人物比較|制度比較)：/.test(title));
+    });
     const suspicious = items.filter(item =>
       item.some(value => typeof value === 'string' && /…|\.{3,}/u.test(value))
     );
@@ -25,10 +31,10 @@ for (const track of tracks) {
     total += items.length;
     flagged += suspicious.length;
     for (const item of suspicious.slice(0, 3)) examples.push(`${track}.${category}: ${item[0]} | ${item.find(value => typeof value === 'string' && /…|\\.{3,}/u.test(value))}`);
-    if (suspicious.length || malformed.length || duplicateTitles) {
+    if (suspicious.length || malformed.length || duplicateTitles || categoryMismatches.length) {
       console.log(
         `REVIEW ${track}.${category}: ${suspicious.length} ellipsis/truncation candidates, ` +
-        `${malformed.length} repeated punctuation, ${duplicateTitles} duplicate titles`
+        `${malformed.length} repeated punctuation, ${duplicateTitles} duplicate titles, ${categoryMismatches.length} category-title mismatches`
       );
     } else {
       console.log(`OK ${track}.${category}: no heuristic flags`);
@@ -38,4 +44,5 @@ for (const track of tracks) {
 console.log(`Quality audit complete: ${total} records; ${flagged} records contain ellipsis/truncation markers.`);
 console.log('Sample candidates (up to 3 per category):');
 for (const example of examples) console.log(`  ${example}`);
+console.log('Category-title mismatch counts above are heuristic and require human review.');
 console.log('This is a heuristic review report, not a factual accuracy proof.');
