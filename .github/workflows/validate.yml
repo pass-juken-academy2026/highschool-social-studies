@@ -41,7 +41,7 @@ jobs:
                   if not js.strip(): continue
                   p=Path(tempfile.gettempdir())/f'inline-{abs(hash((str(f),n)))}.js'; p.write_text(js,encoding='utf-8')
                   r=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
-                  if r.returncode: print(f'JS syntax error in {f}, script {n+1}:\\n{r.stderr}'); failed=True
+                  if r.returncode: print(f'JS syntax error in {f}, script {n+1}:\n{r.stderr}'); failed=True
               print(f'Checked {f}: {len(a.scripts)} scripts')
           if failed: sys.exit(1)
           PY
@@ -59,17 +59,17 @@ jobs:
               '【制度・思想比較】', '【事例問題】',
           ]
           missing = [x for x in required if x not in source]
-          record_re = re.compile(r'\\["([^"]*)\\",\\[([^\\]]*)\\],(\\d+),\\\"([^"]*)\\\"\\]')
+          record_re = re.compile(r'\["([^"]*)",\[([^\]]*)\],(\d+),"([^"]*)"\]')
           records = record_re.findall(source)
           for n, (_, raw_choices, raw_answer, explanation) in enumerate(records, 1):
-              choices = re.findall(r'\\\"([^"]*)\\\"', raw_choices)
+              choices = re.findall(r'"([^"]*)"', raw_choices)
               if len(choices) < 2 or int(raw_answer) >= len(choices) or not explanation.strip():
                   missing.append(f'invalid answer data in question {n}')
           if len(records) < 18:
               missing.append(f'expected at least 18 question records, found {len(records)}')
           if missing:
               print('Stage 2 social studies validation errors:')
-              print('\\n'.join(missing))
+              print('\n'.join(missing))
               sys.exit(1)
           print(f'Stage 2 social studies coverage OK; validated {len(records)} question records')
           PY
