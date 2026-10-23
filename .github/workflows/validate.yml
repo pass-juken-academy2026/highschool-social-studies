@@ -14,18 +14,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Enforce main page size budget
+      - name: Enforce page and bank-file size budgets
         run: |
           python - <<'PY'
           from pathlib import Path
           import sys
-          path = Path('index.html')
-          size = path.stat().st_size
+          paths = [Path('index.html'), *sorted(Path('.').glob('bank-data*.js'))]
           limit = 1_000_000
-          print(f'{path}: {size:,} bytes (limit: {limit:,} bytes)')
-          if size >= limit:
-              sys.exit('index.html exceeds the repository size budget')
+          failed = False
+          for path in paths:
+              size = path.stat().st_size
+              print(f'{path}: {size:,} bytes (limit: {limit:,} bytes)')
+              if size >= limit:
+                  failed = True
+          if failed:
+              sys.exit('A page or study-bank file exceeds the size budget')
           PY
+      - name: Validate split study bank JavaScript and counts
+        run: |
+          for file in bank-data*.js; do
+            node --check "$file"
+          done
+          node tests/validate-bank-data.cjs
       - name: Validate HTML and inline JavaScript
         run: |
           python - <<'PY'
