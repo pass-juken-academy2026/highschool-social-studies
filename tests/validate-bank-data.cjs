@@ -4,12 +4,12 @@ const vm = require('node:vm');
 const tracks = ['geo', 'jhist', 'whist', 'ethics', 'politics', 'integrated'];
 const categories = ['people', 'laws', 'timeline', 'sequence'];
 const expected = {
-  geo: { people: 478, laws: 438, timeline: 461, sequence: 458 },
-  jhist: { people: 492, laws: 442, timeline: 459, sequence: 459 },
-  whist: { people: 500, laws: 452, timeline: 475, sequence: 459 },
-  ethics: { people: 456, laws: 442, timeline: 461, sequence: 456 },
-  politics: { people: 457, laws: 442, timeline: 458, sequence: 458 },
-  integrated: { people: 467, laws: 459, timeline: 457, sequence: 462 },
+  geo: { people: 678, laws: 638, timeline: 661, sequence: 658 },
+  jhist: { people: 692, laws: 642, timeline: 659, sequence: 659 },
+  whist: { people: 700, laws: 652, timeline: 675, sequence: 659 },
+  ethics: { people: 656, laws: 642, timeline: 661, sequence: 656 },
+  politics: { people: 657, laws: 642, timeline: 658, sequence: 658 },
+  integrated: { people: 667, laws: 659, timeline: 657, sequence: 662 },
 };
 
 const context = vm.createContext({});
