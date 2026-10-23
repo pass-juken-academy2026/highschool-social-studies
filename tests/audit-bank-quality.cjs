@@ -20,6 +20,9 @@ for (const track of tracks) {
         (category === 'laws' && /^(人物比較|手順比較)：/.test(title)) ||
         (category === 'sequence' && /^(人物比較|制度比較)：/.test(title));
     });
+    const peopleComparisonTemplates = category === 'people'
+      ? items.filter(item => typeof item[0] === 'string' && /^人物比較：/.test(item[0]))
+      : [];
     const suspicious = items.filter(item =>
       item.some(value => typeof value === 'string' && /…|\.{3,}/u.test(value))
     );
@@ -31,6 +34,12 @@ for (const track of tracks) {
     total += items.length;
     flagged += suspicious.length;
     for (const item of suspicious.slice(0, 3)) examples.push(`${track}.${category}: ${item[0]} | ${item.find(value => typeof value === 'string' && /…|\\.{3,}/u.test(value))}`);
+    if (peopleComparisonTemplates.length) {
+      console.log(
+        `REVIEW ${track}.${category}: ${peopleComparisonTemplates.length} person-comparison template records; ` +
+        `inspect whether both compared terms are actually people`
+      );
+    }
     if (suspicious.length || malformed.length || duplicateTitles || categoryMismatches.length) {
       console.log(
         `REVIEW ${track}.${category}: ${suspicious.length} ellipsis/truncation candidates, ` +
