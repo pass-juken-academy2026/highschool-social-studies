@@ -25,19 +25,19 @@ const assert = require('node:assert/strict');
     await page.locator('#clearCategoryFilter').click();
     assert.ok(await page.locator('#stage article.entry:visible').count() > 1, 'clear filter should restore entries');
 
+    await page.locator('#subject-wide-search summary').click();
+    await page.locator('#sws-query').fill('サヘル');
+    await page.locator('#sws-results .sws-result').first().waitFor();
+    assert.ok(await page.locator('#sws-results .sws-result').count() > 0, 'global search should return results for visible study content');
+    await page.locator('#sws-reset').click();
+    assert.equal((await page.locator('#sws-query').inputValue()), '', 'global search reset should clear query');
+
     await page.locator('#menuBack').click();
     await page.locator('#menu [data-mode="timeline"]').click();
     assert.ok(await page.locator('#stage article.event').count() > 0, 'timeline events should render');
     await page.locator('#menuBack').click();
     await page.locator('#backHome').click();
     await page.locator('#home').waitFor();
-
-    await page.locator('#subject-wide-search summary').click();
-    await page.locator('#sws-query').fill('サヘル');
-    await page.locator('#sws-results .sws-result').first().waitFor();
-    assert.ok(await page.locator('#sws-results .sws-result').count() > 0, 'global search should return results');
-    await page.locator('#sws-reset').click();
-    assert.equal((await page.locator('#sws-query').inputValue()), '', 'global search reset should clear query');
 
     assert.deepEqual(pageErrors, [], 'page should have no uncaught JavaScript errors');
     console.log('Browser smoke test passed: page load, 6 tracks, people list, category filter/reset, timeline, navigation, global search/reset; no uncaught page errors.');
