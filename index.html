@@ -338,7 +338,7 @@ if(mode==="search"){title="10. 単語検索";body='<p class="muted">用語を検
 if(["mcq","tf","fill","mock","common"].includes(mode)){title=({"mcq":"5. 四択問題","tf":"6. 正誤問題","fill":"7. 空欄補充","mock":"8. 模擬テスト","common":"9. 共通テスト型"})[mode];let scope="";if(active.id==="integrated")scope='<label for="rangeSelect">出題範囲：</label><select id="rangeSelect"><option value="all">3範囲を横断</option><option value="geo">地理総合</option><option value="history">歴史総合</option><option value="public">公共</option></select>';body='<p class="muted">解答後に正誤・解説・間違えた範囲を表示します。</p>'+scope+'<div id="quiz"></div><div class="toolbar"><button id="gradeQuiz">採点して弱点を確認</button><button class="secondary" id="retryQuiz">もう一度出題</button></div><div id="quizResult"></div>';}
 $("stage").innerHTML='<div class="row"><h2>'+title+'</h2><button class="ghost" id="menuBack">メニューへ戻る</button></div>'+body;
 if(["people","laws","timeline","sequence"].includes(mode)){
- const filterBar=document.createElement("section");filterBar.className="panel category-filter";filterBar.innerHTML='<label for="categorySearch"><strong>🔎 この分類を検索・絞り込み</strong></label><div class="searchrow"><input id="categorySearch" type="search" placeholder="用語・人物・年代・説明で検索" autocomplete="off"><select id="categoryFacet" aria-label="分類で絞り込み"><option value="">すべて表示</option></select><button type="button" class="secondary" id="clearCategoryFilter">解除</button></div><p id="categoryCount" class="muted" aria-live="polite"></p>';
+ const filterBar=document.createElement("section");filterBar.className="panel category-filter";filterBar.innerHTML='<label for="categorySearch"><strong>🔎 この分類を検索・絞り込み</strong></label><div class="searchrow"><input id="categorySearch" type="search" placeholder="用語・人物・年代・説明で検索" autocomplete="off"><div id="categoryFacet" aria-label="分類で絞り込み" style="display:flex;flex-wrap:wrap;gap:6px"></div><button type="button" class="secondary" id="clearCategoryFilter">解除</button></div><p id="categoryCount" class="muted" aria-live="polite"></p>';
  const row=$("stage").querySelector(".row");row.insertAdjacentElement("afterend",filterBar);
  const cards=Array.from($("stage").querySelectorAll("article.entry,article.event"));
  const facet=$("categoryFacet"),search=$("categorySearch"),count=$("categoryCount");
@@ -350,9 +350,9 @@ if(["people","laws","timeline","sequence"].includes(mode)){
    return groups.find(g=>text.includes(g))||"その他";
  };
  const facets=[...new Set(cards.map(facetValue).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ja"));
- facets.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;facet.appendChild(o);});
- const apply=()=>{const q=normalizeSearch(search.value),f=facet.value;let shown=0;cards.forEach(card=>{const hit=(!q||normalizeSearch(card.innerText||card.textContent).includes(q))&&(!f||facetValue(card)===f);card.hidden=!hit;if(hit)shown++;});count.textContent=shown+" / "+cards.length+" 件を表示";};
- search.addEventListener("input",apply);facet.addEventListener("change",apply);$("clearCategoryFilter").onclick=()=>{search.value="";facet.value="";apply();search.focus();};apply();
+ facets.forEach(v=>{const label=document.createElement("label");label.style.cssText="display:flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer";const cb=document.createElement("input");cb.type="checkbox";cb.value=v;label.append(cb,document.createTextNode(v));facet.appendChild(label);});
+ const apply=()=>{const q=normalizeSearch(search.value),fs=[...facet.querySelectorAll("input:checked")].map(x=>x.value);let shown=0;cards.forEach(card=>{const hit=(!q||normalizeSearch(card.innerText||card.textContent).includes(q))&&(!fs.length||fs.includes(facetValue(card)));card.hidden=!hit;if(hit)shown++;});count.textContent=shown+" / "+cards.length+" 件を表示";};
+ search.addEventListener("input",apply);facet.addEventListener("change",apply);facet.querySelectorAll("input").forEach(cb=>cb.addEventListener("change",apply));$("clearCategoryFilter").onclick=()=>{search.value="";facet.querySelectorAll("input").forEach(cb=>cb.checked=false);apply();search.focus();};apply();
 }
 $("menuBack").onclick=()=>{$("stage").classList.add("hide");$("menu").classList.remove("hide");};
 if(["mcq","tf","fill","mock","common"].includes(mode)){if($("rangeSelect"))$("rangeSelect").onchange=()=>renderQuiz(mode);renderQuiz(mode);}
