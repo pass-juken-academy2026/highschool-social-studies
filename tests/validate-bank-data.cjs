@@ -85,6 +85,7 @@ for (const file of ['bank-data.js', ...tracks.map(track => `bank-data-${track}.j
 }
 const bank = vm.runInContext('JSON.parse(JSON.stringify(BANK))', context);
 for (const track of tracks) {
+  if (!Array.isArray(bank[track]?.questions)) throw new Error(`${track}: question bank was not initialized`);
   for (const category of categories) {
     const items = bank[track]?.[category] ?? [];
     if (items.length !== expected[track][category]) throw new Error(`${track}.${category}: expected ${expected[track][category]} entries, found ${items.length}`);
