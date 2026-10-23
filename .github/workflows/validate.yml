@@ -36,6 +36,9 @@ jobs:
             node --check "$file"
           done
           node tests/validate-bank-data.cjs
+      - name: Report study-bank text quality flags
+        run: node tests/audit-bank-quality.cjs
+
       - name: Validate HTML and inline JavaScript
         run: |
           python - <<'PY'
