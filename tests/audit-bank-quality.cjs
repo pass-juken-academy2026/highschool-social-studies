@@ -16,7 +16,7 @@ for (const track of tracks) {
     const items = bank[track]?.[category] ?? [];
     const categoryMismatches = items.filter(item => {
       const title = typeof item[0] === 'string' ? item[0] : '';
-      return (category === 'people' && /^(制度比較|手順比較|比較演習)：/.test(title)) ||
+      return (category === 'people' && /^(人物比較|制度比較|手順比較|比較演習)：/.test(title)) ||
         (category === 'laws' && /^(人物比較|手順比較)：/.test(title)) ||
         (category === 'sequence' && /^(人物比較|制度比較)：/.test(title));
     });
