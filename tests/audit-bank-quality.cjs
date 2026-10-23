@@ -39,6 +39,9 @@ for (const track of tracks) {
         `REVIEW ${track}.${category}: ${peopleComparisonTemplates.length} person-comparison template records; ` +
         `inspect whether both compared terms are actually people`
       );
+      for (const item of peopleComparisonTemplates.slice(0, 3)) {
+        console.log(`  person-comparison example: ${item[0]}`);
+      }
     }
     if (suspicious.length || malformed.length || duplicateTitles || categoryMismatches.length) {
       console.log(
