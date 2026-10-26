@@ -14,6 +14,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Enforce page and bank-file size budgets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          paths = [Path('index.html'), *sorted(Path('.').glob('bank-data*.js'))]
+          limit = 1_000_000
+          failed = False
+          for path in paths:
+              size = path.stat().st_size
+              print(f'{path}: {size:,} bytes (limit: {limit:,} bytes)')
+              if size >= limit:
+                  failed = True
+          if failed:
+              sys.exit('A page or study-bank file exceeds the size budget')
+          PY
+      - name: Validate split study bank JavaScript and counts
+        run: |
+          for file in bank-data*.js; do
+            node --check "$file"
+          done
+          node tests/validate-bank-data.cjs
+      - name: Report study-bank text quality flags
+        run: node tests/audit-bank-quality.cjs
+
       - name: Validate HTML and inline JavaScript
         run: |
           python - <<'PY'
@@ -76,16 +101,21 @@ jobs:
 
   browser-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Playwright and Chromium
-        run: |
-          npm init -y
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
+      - name: Install Playwright package
+        run: npm install --no-save playwright
+        timeout-minutes: 5
+      - name: Install Chromium system dependencies
+        run: npx playwright install-deps chromium
+        timeout-minutes: 10
+      - name: Install Chromium browser
+        run: npx playwright install chromium
+        timeout-minutes: 5
       - name: Start local static server
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/study-site.log 2>&1 &
