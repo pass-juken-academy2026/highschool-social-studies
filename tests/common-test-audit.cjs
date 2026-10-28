@@ -29,12 +29,12 @@ const a = index.indexOf('const COMMON_CASES=');
 const b = index.indexOf('const EXTRA_QUESTIONS=', a);
 const casesSource = a >= 0 && b > a ? index.slice(a, b) : '';
 const tracks = ['geo', 'jhist', 'whist', 'politics', 'ethics', 'integrated'];
-for (const track of tracks) if (!new RegExp('\\\\b' + track + '\\\\s*:\\\\s*\\\\[').test(casesSource)) errors.push('Missing common-test track: ' + track);
-const caseCount = (casesSource.match(/makeSocialCase\\(/g) || []).length;
-const questionCalls = [...casesSource.matchAll(/makeSocialQuestion\\("((?:\\\\.|[^"\\\\])*)"/g)];
+for (const track of tracks) if (!new RegExp('\\b' + track + '\\s*:\\s*\\[').test(casesSource)) errors.push('Missing common-test track: ' + track);
+const caseCount = (casesSource.match(/makeSocialCase\(/g) || []).length;
+const questionCalls = [...casesSource.matchAll(/makeSocialQuestion\("((?:\\.|[^"\\])*)"/g)];
 if (caseCount !== 36) errors.push('Expected 36 track-specific common cases, found ' + caseCount);
 if (questionCalls.length !== 168) errors.push('Expected 168 track-specific questions, found ' + questionCalls.length);
-const normalize = s => String(s || '').normalize('NFKC').toLowerCase().replace(/\\s+/g, '');
+const normalize = s => String(s || '').normalize('NFKC').toLowerCase().replace(/\s+/g, '');
 const seenCasePrompts = new Set();
 for (const match of questionCalls) {
   const prompt = normalize(match[1]);
