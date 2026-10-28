@@ -127,3 +127,5 @@ jobs:
           exit 1
       - name: Exercise core study flows in Chromium
         run: node tests/browser-smoke.cjs
+      - name: Check common-test case coverage and stimulus groups
+        run: node tests/common-test-audit.cjs
