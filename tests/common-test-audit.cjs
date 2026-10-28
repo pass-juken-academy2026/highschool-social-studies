@@ -31,15 +31,28 @@ const casesSource = a >= 0 && b > a ? index.slice(a, b) : '';
 const tracks = ['geo', 'jhist', 'whist', 'politics', 'ethics', 'integrated'];
 for (const track of tracks) if (!new RegExp('\\b' + track + '\\s*:\\s*\\[').test(casesSource)) errors.push('Missing common-test track: ' + track);
 const caseCount = (casesSource.match(/makeSocialCase\(/g) || []).length;
-const questionCalls = [...casesSource.matchAll(/makeSocialQuestion\("((?:\\.|[^"\\])*)"/g)];
+const questionCalls = [...casesSource.matchAll(/makeSocialQuestion\("([^"]*)"/g)];
+const questionRecords = [...casesSource.matchAll(/makeSocialQuestion\("([^"]*)",\s*\[([^\]]*)\],\s*([0-9]+),\s*"([^"]*)"/g)];
 if (caseCount !== 36) errors.push('Expected 36 track-specific common cases, found ' + caseCount);
 if (questionCalls.length !== 168) errors.push('Expected 168 track-specific questions, found ' + questionCalls.length);
+if (questionRecords.length !== 168) errors.push('Expected to parse 168 complete track-specific question records, found ' + questionRecords.length);
 const normalize = s => String(s || '').normalize('NFKC').toLowerCase().replace(/\s+/g, '');
 const seenCasePrompts = new Set();
 for (const match of questionCalls) {
   const prompt = normalize(match[1]);
   if (seenCasePrompts.has(prompt)) errors.push('Duplicate track-specific question prompt: ' + match[1]);
   seenCasePrompts.add(prompt);
+}
+for (const [i, match] of questionRecords.entries()) {
+  const prompt = match[1];
+  const options = [...match[2].matchAll(/"([^"]*)"/g)].map(option => option[1]);
+  const answer = Number(match[3]);
+  const explanation = match[4];
+  if (!prompt.trim()) errors.push('Track-specific question ' + (i + 1) + ': missing prompt.');
+  if (options.length !== 4 || options.some(option => !option.trim())) errors.push('Track-specific question ' + (i + 1) + ': expected four non-empty options.');
+  if (new Set(options).size !== options.length) errors.push('Track-specific question ' + (i + 1) + ': duplicate options.');
+  if (!Number.isInteger(answer) || answer < 0 || answer >= options.length) errors.push('Track-specific question ' + (i + 1) + ': answer index out of range.');
+  if (explanation.trim().length < 8) errors.push('Track-specific question ' + (i + 1) + ': missing or too-short explanation.');
 }
 let stimuli, questions;
 try {
