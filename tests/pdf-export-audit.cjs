@@ -20,7 +20,7 @@ const { chromium } = require('playwright');
     let text = await popup.locator('body').innerText();
     assert.match(text, /問題/);
     assert.doesNotMatch(text, /正解：|解答・解説/);
-    await popup.close();
+    const pdf1 = await popup.pdf({ format: 'A4' }); assert.equal(pdf1.subarray(0, 4).toString(), '%PDF'); assert.ok(pdf1.length > 1000); const pdf2 = await popup.pdf({ format: 'A4' }); assert.equal(pdf2.subarray(0, 4).toString(), '%PDF'); assert.ok(pdf2.length > 1000); const pdf3 = await popup.pdf({ format: 'A4' }); assert.equal(pdf3.subarray(0, 4).toString(), '%PDF'); assert.ok(pdf3.length > 1000); await popup.close();
     popup = await openExport('#pdfAnswers');
     text = await popup.locator('body').innerText();
     assert.match(text, /正解：/);
