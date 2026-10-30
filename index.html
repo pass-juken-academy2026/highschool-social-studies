@@ -470,4 +470,31 @@ $("tracks").addEventListener("click",e=>{const b=e.target.closest("[data-track]"
  reset.addEventListener('click',()=>{input.value='';render();input.focus();});
  results.addEventListener('click',event=>{const b=event.target.closest('[data-sws-index]');if(!b)return;const item=matches[Number(b.dataset.swsIndex)];if(!item)return;item.el.scrollIntoView({behavior:'smooth',block:'center'});const old=item.el.style.outline,offset=item.el.style.outlineOffset;item.el.style.outline='3px solid #65c9f1';item.el.style.outlineOffset='4px';setTimeout(()=>{item.el.style.outline=old;item.el.style.outlineOffset=offset;},1600);});
 })();
-</script></body></html>
+</script>
+<style id="low-contrast-control-fix-20261030">
+/* Fix the reported pale text on white checkbox/choice rows. Keep text and control surfaces at readable contrast. */
+#stage label:has(input[type="checkbox"]),
+#stage label:has(input[type="radio"]),
+#stage .choices label,
+#stage .sequence label,
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]){
+  background:#102b49!important;
+  color:#f4f9ff!important;
+  border:1px solid #527da4!important;
+  border-radius:10px;
+}
+#stage label:has(input[type="checkbox"]) *,
+#stage label:has(input[type="radio"]) *,
+#stage .choices label *,
+label:has(input[type="checkbox"]) *,
+label:has(input[type="radio"]) *{color:inherit!important;}
+#stage label:has(input[type="checkbox"]):hover,
+#stage label:has(input[type="radio"]):hover,
+label:has(input[type="checkbox"]):hover,
+label:has(input[type="radio"]):hover{border-color:#6ed8ff!important;}
+#stage input[type="checkbox"],#stage input[type="radio"],input[type="checkbox"],input[type="radio"]{accent-color:#25a9ef;}
+#stage button:disabled,#stage [aria-disabled="true"]{color:#d4e2ef!important;opacity:1!important;background:#263f58!important;border-color:#52708b!important;}
+@media(forced-colors:active){#stage label:has(input[type="checkbox"]),#stage label:has(input[type="radio"]),label:has(input[type="checkbox"]),label:has(input[type="radio"]){forced-color-adjust:auto;}}
+</style>
+</body></html>
