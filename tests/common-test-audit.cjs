@@ -54,11 +54,11 @@ for (const [i, match] of questionRecords.entries()) {
   if (!Number.isInteger(answer) || answer < 0 || answer >= options.length) errors.push('Track-specific question ' + (i + 1) + ': answer index out of range.');
   if (explanation.trim().length < 8) errors.push('Track-specific question ' + (i + 1) + ': missing or too-short explanation.');
 }
-const caseMatches = [...casesSource.matchAll(/makeSocialCase\("([^"]*)","([^"]*)",\\s*"([^"]*)",\\[/g)];
+const caseMatches = [...casesSource.matchAll(/makeSocialCase\("([^"]*)","([^"]*)",\s*"([^"]*)",\[/g)];
 for (let i = 0; i < caseMatches.length; i++) {
   const match = caseMatches[i], end = caseMatches[i + 1]?.index ?? casesSource.length;
   const caseSource = casesSource.slice(match.index, end);
-  const qMatches = [...caseSource.matchAll(/makeSocialQuestion\("([^"]*)",\\s*\\[([^\\]]*)\\],\\s*(\\d+),/g)];
+  const qMatches = [...caseSource.matchAll(/makeSocialQuestion\("([^"]*)",\s*\[([^\]]*)\],\s*(\d+),/g)];
   if (match[2].length < 200) errors.push('Case stimulus shorter than 200 characters: ' + match[1]);
   if (![4, 8].includes(qMatches.length)) errors.push(match[1] + ': expected four or eight linked questions');
   const positions = [0, 0, 0, 0];
@@ -88,12 +88,14 @@ if (questions && stimuli) {
       if (seen.has(q[4])) errors.push(label + ': a stimulus is split across groups');
       seen.add(q[4]); previous = q[4];
     }
-    counts.set(q[4], (counts.get(q[4]) || 0) + 1);\n    genericPositions[q[2]]++;
+    counts.set(q[4], (counts.get(q[4]) || 0) + 1);
+    genericPositions[q[2]]++;
     const prompt = normalize(q[0]);
     if (prompts.has(prompt)) errors.push(label + ': duplicate generic prompt');
     prompts.add(prompt);
   }
-  for (let i = 0; i < stimuli.length; i++) if (counts.get(i) !== 5) errors.push('Stimulus ' + i + ' should have five questions.');\n  if (genericPositions.some(n => n !== 5)) errors.push('Generic common-test answer positions should be balanced 5 per option.');
+  for (let i = 0; i < stimuli.length; i++) if (counts.get(i) !== 5) errors.push('Stimulus ' + i + ' should have five questions.');
+  if (genericPositions.some(n => n !== 5)) errors.push('Generic common-test answer positions should be balanced 5 per option.');
 }
 if (errors.length) { console.error(errors.join('\n')); process.exit(1); }
 console.log('Social studies common-test data OK: six tracks, 42 cases/192 questions, plus four linked generic stimuli.');
