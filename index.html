@@ -376,7 +376,7 @@ Object.keys(EXTRA_QUESTIONS).forEach(k=>BANK[k].questions.push(...EXTRA_QUESTION
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function slug(s){return String(s).replace(/[^\wぁ-んァ-ヶ一-龠ー]/g,"-");}
-function renderTracks(){$("tracks").innerHTML=TRACKS.map(t=>'<button class="track" data-track="'+t.id+'"><strong>'+t.icon+' '+esc(t.name)+'</strong><small>'+esc(t.desc)+'</small><span class="tag">この科目を学ぶ →</span></button>').join("");}
+function renderTracks(){$("tracks").innerHTML=TRACKS.map(t=>'<button class="track" data-track="'+esc(t.id)+'"><strong>'+esc(t.icon)+' '+esc(t.name)+'</strong><small>'+esc(t.desc)+'</small><span class="tag">この科目を学ぶ →</span></button>').join("");}
 function chooseTrack(id){active=TRACKS.find(t=>t.id===id)||TRACKS[0];$("workspace").classList.remove("hide");$("trackTag").textContent=active.name;$("workTitle").textContent="学習メニュー";$("trackDesc").textContent=active.desc;$("stage").classList.add("hide");$("menu").classList.remove("hide");$("workspace").scrollIntoView({behavior:"smooth",block:"start"});}
 function goHome(){if(quizTimerId){clearInterval(quizTimerId);quizTimerId=null;}$("workspace").classList.add("hide");$("home").scrollIntoView({behavior:"smooth",block:"start"});}
 function modeName(m){return ({people:"人物・場所",laws:"法律・条約",timeline:"年表",sequence:"時代・王朝・事件順／地理正誤"})[m]||m;}
