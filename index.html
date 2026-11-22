@@ -485,13 +485,13 @@ $("tracks").addEventListener("click",e=>{const b=e.target.closest("[data-track]"
    }).map((el,i)=>({el,text:textOf(el),i}));
  }
  function render(){
-   const q=input.value.trim().toLocaleLowerCase();results.innerHTML='';matches=[];
+   const q=input.value.trim().toLocaleLowerCase();results.replaceChildren();matches=[];
    if(!q){meta.textContent='検索語を入力すると、現在表示されている学習項目を検索します。';return;}
-   const terms=q.split(/\s+/).filter(Boolean);
+   const terms=q.split(/\\s+/).filter(Boolean);
    matches=indexItems().filter(item=>terms.every(term=>item.text.toLocaleLowerCase().includes(term))).slice(0,80);
    meta.textContent=matches.length+'件表示'+(matches.length===80?'（最大80件）':'')+'。結果を選ぶと該当箇所へ移動します。';
-   if(!matches.length){results.innerHTML='<p>該当する項目がありません。別の語句で検索するか、リセットしてください。</p>';return;}
-   results.innerHTML=matches.map((item,i)=>{const h=item.el.querySelector('h1,h2,h3,h4,strong,b,.title,.name');const title=h?textOf(h):item.text;const snippet=item.text.length>230?item.text.slice(0,230)+'…':item.text;return '<button type="button" class="sws-result" data-sws-index="'+i+'"><strong>'+esc(title.slice(0,100))+'</strong><span>'+esc(snippet)+'</span></button>';}).join('');
+   if(!matches.length){const p=document.createElement('p');p.textContent='該当する項目がありません。別の語句で検索するか、リセットしてください。';results.append(p);return;}
+   matches.forEach((item,i)=>{const h=item.el.querySelector('h1,h2,h3,h4,strong,b,.title,.name');const title=h?textOf(h):item.text;const snippet=item.text.length>230?item.text.slice(0,230)+'…':item.text;const button=document.createElement('button');button.type='button';button.className='sws-result';button.dataset.swsIndex=String(i);const strong=document.createElement('strong');strong.textContent=title.slice(0,100);const span=document.createElement('span');span.textContent=snippet;button.append(strong,span);results.append(button);});
  }
  input.addEventListener('input',render);
  reset.addEventListener('click',()=>{input.value='';render();input.focus();});
